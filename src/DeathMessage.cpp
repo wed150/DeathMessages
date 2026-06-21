@@ -34,9 +34,8 @@ Actor* getDamagingEntity(ActorDamageSource* ads) {
 std::string getResourcePackKey(std::string const& name, Actor* ac) {
     if (ac->hasCategory(ActorCategory::Player)){return name;}
 
-    auto type = ac->getTypeName();
-    ll::utils::string_utils::replaceAll(type, "minecraft:", "");
-    std::string res = "%entity." + type + ".name";
+    auto type = ac->getEntityLocNameString();
+    std::string res = "%" + type;
     return res;
 }
 
