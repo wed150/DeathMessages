@@ -17,6 +17,7 @@
 
 #include "gmlib/gm/i18n/LangI18n.h"
 #include "gmlib/gm/i18n/ResourceI18n.h"
+#include "gmlib/mc/locale/I18nAPI.h"
 
 ll::io::LoggerRegistry&         loggerRegistry = ll::io::LoggerRegistry::getInstance();
 std::shared_ptr<ll::io::Logger> logger         = loggerRegistry.getOrCreate(MOD_NAME);
@@ -53,9 +54,11 @@ bool Entry::load() {
             ll::makePolymorphic<ll::io::PatternFormatter>("[{3:.3%F %T.} {2}][{1}] {0}", false);
         deathLogger->addSink(std::make_shared<ll::io::FileSink>(path, polymorphicFormatter));
     }
-    loadI18n();
     if ((!getConfig().ServerSideTranslation.Enabled)&&ll::mod::ModManagerRegistry::getInstance().hasMod("ModAPI")) {
         loadResourcePack();
+    }else {
+        loadI18n();
+
     }
     return true;
 }
@@ -133,9 +136,19 @@ void Entry::loadResourcePack() {
 
 LL_REGISTER_MOD(DeathMessages::Entry, DeathMessages::Entry::getInstance());
 
-std::string tr(std::string const& key, std::vector<std::string> const& params) {
+std::string tr(std::string const& key, std::vector<std::string> params) {
+    if (DeathMessages::Entry::getInstance().isResourceI18nLoaded) {
+        return gmlib::I18nAPI::get(key, params);
+    }
     auto& i18n = DeathMessages::Entry::getInstance().getI18n();
-        return i18n.get(key, params);
+    logger->info(DeathMessages::Entry::getInstance().isResourceI18nLoaded ? "ResourceI18nLoaded" : "LangI18nLoaded");
+    if (params.size() > 1)
+        params.at(1) = gmlib::I18nAPI::get(
+            params.at(1),
+            {},
+            DeathMessages::Entry::getInstance().getConfig().ServerSideTranslation.Language
+        );
+    return i18n.get(key, params);
     return key;
 }
 
