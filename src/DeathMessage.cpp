@@ -38,7 +38,6 @@ std::string getResourcePackKey(std::string const& name, Actor* ac) {
     std::string res = "%" + type;
     return res;
 }
-
 // 构造死亡信息输出
 DeathMessageResult makeDeathMessage(
     int            cause,
